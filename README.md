@@ -1,4 +1,4 @@
-# evry
+# evry [![Build Status](https://travis-ci.org/k1LoW/evry.svg?branch=master)](https://travis-ci.org/k1LoW/evry)
 
 `evry` split STDIN stream and execute specified command **every** N lines/seconds.
 
