@@ -13,12 +13,14 @@ var tests = []struct {
 }{
 	{"echo evry", "./evry -l 1"},
 	{"echo evry", "./evry -l 3"},
+	{`echo -e "a\nb\nc"`, "./evry -l 3"},
 	{"cat LICENSE", "./evry -l 1"},
 	{"cat LICENSE", "./evry -l 3"},
 	{"cat LICENSE", "./evry -l 1 | cat"},
 	{"cat LICENSE", "./evry -l 3 | cat"},
 	{"echo evry", "./evry -s 1"},
 	{"echo evry", "./evry -s 3"},
+	{`echo -e "a\nb\nc"`, "./evry -s 3"},
 	{"cat LICENSE", "./evry -s 1"},
 	{"cat LICENSE", "./evry -s 3"},
 	{"cat LICENSE", "./evry -s 1 | cat"},
@@ -36,7 +38,7 @@ func TestCat(t *testing.T) {
 }
 
 func TestMutex(t *testing.T) {
-	cmd := `echo "2\n0\n1" | ./evry -l 1 -c 'xargs -I@ sh -c "sleep @; echo sleep @"'`
+	cmd := `echo -e "2\n0\n1" | ./evry -l 1 -c 'xargs -I@ sh -c "sleep @; echo sleep @"'`
 	want := "sleep 2\nsleep 0\nsleep 1\n"
 	got := execCmd(cmd)
 	if got != want {
@@ -45,7 +47,7 @@ func TestMutex(t *testing.T) {
 }
 
 func TestPipe(t *testing.T) {
-	cmd := `echo "b\nc\na\ne\nd" | ./evry -l 10 -c 'cat | sort | head -3'`
+	cmd := `echo -e "b\nc\na\ne\nd" | ./evry -l 10 -c 'cat | sort | head -3'`
 	want := "a\nb\nc\n"
 	got := execCmd(cmd)
 	if got != want {
