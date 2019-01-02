@@ -117,9 +117,9 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&line, "line", "l", 0, "split stream every [line] lines")
-	rootCmd.Flags().IntVarP(&sec, "sec", "s", 0, "split stream every [sec] seconds")
-	rootCmd.Flags().StringVarP(&command, "command", "c", "cat", "execute command")
+	rootCmd.Flags().IntVarP(&line, "line", "l", 0, "split stream every N lines")
+	rootCmd.Flags().IntVarP(&sec, "sec", "s", 0, "split stream every N seconds")
+	rootCmd.Flags().StringVarP(&command, "command", "c", "cat", "command to be executed")
 	rootCmd.Flags().IntVarP(&timeout, "timeout", "", 600, "command timeout")
 	rootCmd.Flags().BoolP("help", "h", false, "help for evry")
 	rootCmd.Flags().BoolP("version", "v", false, "version for evry")
