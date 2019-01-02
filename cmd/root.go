@@ -44,14 +44,23 @@ const version = "0.1.0"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use: "evry",
+	Use: "[STDIN] | evry [-l N or -s N] -c [COMMAND]",
 	Example: `  Count number of requests every 10 seconds
 
     tail -f access.log | evry -s 10 -c 'wc -l'`,
-	Short:   "evry split STDIN stream and execute specified command every N lines/seconds",
-	Long:    `evry split STDIN stream and execute specified command every N lines/seconds.`,
-	Version: version,
+	Short: "evry split STDIN stream and execute specified command every N lines/seconds",
+	Long:  `evry split STDIN stream and execute specified command every N lines/seconds.`,
 	Args: func(cmd *cobra.Command, args []string) error {
+		// `--version` option
+		versionVal, err := cmd.Flags().GetBool("version")
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+		if versionVal {
+			fmt.Println(version)
+			os.Exit(0)
+		}
 		if terminal.IsTerminal(0) {
 			return errors.New("evry need STDIN. Please use pipe")
 		}
@@ -64,6 +73,7 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 		var s splitter.Splitter
 		var err error
+
 		if line > 0 {
 			s, err = splitter.NewLineSplitter(ctx, line, command, timeout)
 		} else if sec > 0 {
@@ -111,4 +121,6 @@ func init() {
 	rootCmd.Flags().IntVarP(&sec, "sec", "s", 0, "split stream every [sec] seconds")
 	rootCmd.Flags().StringVarP(&command, "command", "c", "cat", "execute command")
 	rootCmd.Flags().IntVarP(&timeout, "timeout", "", 600, "command timeout")
+	rootCmd.Flags().BoolP("help", "h", false, "help for evry")
+	rootCmd.Flags().BoolP("version", "v", false, "version for evry")
 }

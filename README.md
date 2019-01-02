@@ -11,6 +11,10 @@ Key features of `evry` are:
 
 ## Usage
 
+``` console
+$ [STDIN] | evry [-l N or -s N] -c [COMMAND]
+```
+
 ### Count number of requests every 10 seconds
 
 ``` console
