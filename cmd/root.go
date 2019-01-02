@@ -1,4 +1,4 @@
-// Copyright © 2018 Ken'ichiro Oyama <k1lowxb@gmail.com>
+// Copyright © 2019 Ken'ichiro Oyama <k1lowxb@gmail.com>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,81 @@
 package cmd
 
 import (
+	"bufio"
+	"context"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 
+	"github.com/k1LoW/evry/splitter"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
+)
+
+var (
+	line    int
+	sec     int
+	command string
+	timeout int
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "evry",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Use: "evry",
+	Example: `  Count number of requests every 10 seconds
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+    tail -f access.log | evry -s 10 -c 'wc -l'`,
+	Short: "evry split STDIN stream and execute specified command every N lines/seconds",
+	Long:  `evry split STDIN stream and execute specified command every N lines/seconds.`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if terminal.IsTerminal(0) {
+			return errors.New("evry need STDIN. Please use pipe")
+		}
+		if (line == 0 && sec == 0) || (line > 0) && (sec > 0) {
+			return errors.New("evry need `--line` OR `--sec` flag")
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
+		var s splitter.Splitter
+		var err error
+		if line > 0 {
+			s, err = splitter.NewLineSplitter(ctx, line, command, timeout)
+		} else if sec > 0 {
+			s, err = splitter.NewSecSplitter(ctx, sec, command, timeout)
+		}
+
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
+
+		go s.Start()
+		defer s.Stop()
+
+		r := bufio.NewReader(os.Stdin)
+		for {
+			b, err := r.ReadBytes('\n')
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+				os.Exit(1)
+			}
+			s.In(b)
+		}
+
+		s.Close()
+		select {
+		case <-s.Done():
+			break
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -52,12 +104,8 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.evry.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.Flags().IntVarP(&line, "line", "l", 0, "split stream every [line] lines")
+	rootCmd.Flags().IntVarP(&sec, "sec", "s", 0, "split stream every [sec] seconds")
+	rootCmd.Flags().StringVarP(&command, "command", "c", "cat", "execute command")
+	rootCmd.Flags().IntVarP(&timeout, "timeout", "", 600, "command timeout")
 }
