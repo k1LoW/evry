@@ -40,14 +40,17 @@ var (
 	timeout int
 )
 
+const version = "0.1.0"
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use: "evry",
 	Example: `  Count number of requests every 10 seconds
 
     tail -f access.log | evry -s 10 -c 'wc -l'`,
-	Short: "evry split STDIN stream and execute specified command every N lines/seconds",
-	Long:  `evry split STDIN stream and execute specified command every N lines/seconds.`,
+	Short:   "evry split STDIN stream and execute specified command every N lines/seconds",
+	Long:    `evry split STDIN stream and execute specified command every N lines/seconds.`,
+	Version: version,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if terminal.IsTerminal(0) {
 			return errors.New("evry need STDIN. Please use pipe")
