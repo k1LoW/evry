@@ -33,6 +33,12 @@ $ tail -f access.log | evry -l 1000 -c 'cut -d" " -f7 | sort | uniq -c | sort -n
 $ go get github.com/k1LoW/evry
 ```
 
+or
+
+```console
+$ brew install k1LoW/tap/evry
+```
+
 ## References
 
 - https://github.com/mattn/go-pipeline
