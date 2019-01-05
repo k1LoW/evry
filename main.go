@@ -20,7 +20,9 @@
 
 package main
 
-import "github.com/k1LoW/evry/cmd"
+import (
+	"github.com/k1LoW/evry/cmd"
+)
 
 func main() {
 	cmd.Execute()
