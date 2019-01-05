@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"sync"
@@ -41,14 +40,14 @@ func (o *Output) Unlock() {
 
 // OutputCombime ...
 func (o *Output) OutputCombime() {
-	o.mutex.Lock()
+	o.Lock()
 	if o.Stdout != "" {
 		fmt.Printf(o.Stdout)
 	}
 	if o.Stderr != "" {
 		_, _ = fmt.Fprintf(os.Stderr, "%s", o.Stderr)
 	}
-	o.mutex.Unlock()
+	o.Unlock()
 }
 
 // Executer ...
@@ -100,7 +99,9 @@ func (e *Executer) NewOutput() *Output {
 
 // Execute ...
 func (e *Executer) Execute(out *Output, in []byte) {
-	defer out.Unlock()
+	defer func() {
+		out.Unlock()
+	}()
 
 	innerCtx, cancel := context.WithTimeout(e.ctx, time.Duration(e.timeout)*time.Second)
 	defer cancel()
@@ -111,13 +112,9 @@ func (e *Executer) Execute(out *Output, in []byte) {
 	// reference: https://github.com/mattn/go-pipeline/blob/master/pipeline.go#L9
 	cmds := make([]*exec.Cmd, len(e.commands))
 	var err error
-	var stdin io.WriteCloser
 
 	for i, c := range e.commands {
 		cmds[i] = exec.CommandContext(innerCtx, c[0], c[1:]...)
-		if i == 0 {
-			stdin, err = cmds[i].StdinPipe()
-		}
 		if i > 0 {
 			if cmds[i].Stdin, err = cmds[i-1].StdoutPipe(); err != nil {
 				out.Stderr = fmt.Sprintf("%s", err)
@@ -127,24 +124,31 @@ func (e *Executer) Execute(out *Output, in []byte) {
 		cmds[i].Stderr = &stderr
 	}
 
-	cmds[len(cmds)-1].Stdout = &stdout
+	stdin, err := cmds[0].StdinPipe()
+	if err != nil {
+		out.Stderr = fmt.Sprintf("%s", err)
+		return
+	}
 
-	_, err = stdin.Write(in)
-	if err != nil {
-		out.Stderr = fmt.Sprintf("%s", err)
-		return
-	}
-	err = stdin.Close()
-	if err != nil {
-		out.Stderr = fmt.Sprintf("%s", err)
-		return
-	}
+	cmds[len(cmds)-1].Stdout = &stdout
 
 	for _, c := range cmds {
 		if err = c.Start(); err != nil {
 			out.Stderr = fmt.Sprintf("%s", err)
 			return
 		}
+	}
+
+	_, err = stdin.Write(in)
+	if err != nil {
+		out.Stderr = fmt.Sprintf("%s", err)
+		return
+	}
+
+	err = stdin.Close()
+	if err != nil {
+		out.Stderr = fmt.Sprintf("%s", err)
+		return
 	}
 
 	for _, c := range cmds {
