@@ -1,7 +1,10 @@
 package splitter
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"os"
 	"sync"
 	"time"
 
@@ -49,8 +52,9 @@ func (s *LineSplitter) Start() {
 	defer s.Stop()
 
 	count := 0
-	buffer := []byte{}
+	buffer := bytes.NewBuffer([]byte{})
 	wg := &sync.WaitGroup{}
+	bm := new(sync.Mutex)
 
 	// output
 	go func() {
@@ -65,28 +69,33 @@ L:
 		select {
 		case in := <-s.in:
 			if in == nil {
-				if len(buffer) > 0 {
-					dst := make([]byte, len(buffer))
-					copy(dst, buffer)
+				if buffer.Len() > 0 {
 					wg.Add(1)
 					out := s.executer.NewOutput()
+					bm.Lock()
+					dst := buffer
 					go s.executer.Execute(out, dst)
-					buffer = nil
+					buffer = bytes.NewBuffer([]byte{})
+					bm.Unlock()
 					count = 0
 				}
 				break L
 			}
-			buffer = append(buffer, in...)
+			bm.Lock()
+			buffer.Write(in)
+			bm.Unlock()
 			count++
 			if count == s.interval {
-				dst := make([]byte, len(buffer))
-				copy(dst, buffer)
 				wg.Add(1)
 				out := s.executer.NewOutput()
+				bm.Lock()
+				dst := buffer
 				go s.executer.Execute(out, dst)
-				buffer = nil
+				buffer = bytes.NewBuffer([]byte{})
+				bm.Unlock()
 				count = 0
 			}
+
 		case <-s.ctx.Done():
 			break L
 		}
@@ -147,8 +156,9 @@ func (s *SecSplitter) Start() {
 	eol := false
 
 	ticker := time.NewTicker(time.Duration(s.interval) * time.Second)
-	buffer := []byte{}
+	buffer := bytes.NewBuffer([]byte{})
 	wg := &sync.WaitGroup{}
+	bm := new(sync.Mutex)
 
 	// output
 	go func() {
@@ -165,15 +175,22 @@ L:
 			if in == nil {
 				eol = true
 			} else {
-				buffer = append(buffer, in...)
+				bm.Lock()
+				_, err := buffer.Write(in)
+				bm.Unlock()
+				if err != nil {
+					_, _ = fmt.Fprintf(os.Stderr, "%s", err)
+					break L
+				}
 			}
 		case <-ticker.C:
-			dst := make([]byte, len(buffer))
-			copy(dst, buffer)
 			wg.Add(1)
 			out := s.executer.NewOutput()
+			bm.Lock()
+			dst := buffer
 			go s.executer.Execute(out, dst)
-			buffer = nil
+			buffer = bytes.NewBuffer([]byte{})
+			bm.Unlock()
 			if eol {
 				break L
 			}

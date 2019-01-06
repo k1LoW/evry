@@ -98,8 +98,9 @@ func (e *Executer) NewOutput() *Output {
 }
 
 // Execute ...
-func (e *Executer) Execute(out *Output, in []byte) {
+func (e *Executer) Execute(out *Output, in *bytes.Buffer) {
 	defer func() {
+		in.Reset()
 		out.Unlock()
 	}()
 
@@ -139,7 +140,7 @@ func (e *Executer) Execute(out *Output, in []byte) {
 		}
 	}
 
-	_, err = stdin.Write(in)
+	_, err = stdin.Write(in.Bytes()) // FIXME
 	if err != nil {
 		out.Stderr = fmt.Sprintf("%s", err)
 		return
