@@ -18,13 +18,13 @@ $ [STDIN] | evry [-l N or -s N] -c [COMMAND]
 ### Count number of requests every 10 seconds
 
 ``` console
-$ tail -f access.log | evry -s 10 -c 'wc -l'
+$ tail -F access.log | evry -s 10 -c 'wc -l'
 ```
 
 ### Show top 5 access rank every 1000 lines
 
 ``` console
-$ tail -f access.log | evry -l 1000 -c 'cut -d" " -f7 | sort | uniq -c | sort -nr | head -5'
+$ tail -F access.log | evry -l 1000 -c 'cut -d" " -f7 | sort | uniq -c | sort -nr | head -5'
 ```
 
 ## Installation
