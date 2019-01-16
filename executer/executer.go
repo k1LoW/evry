@@ -8,8 +8,6 @@ import (
 	"os/exec"
 	"sync"
 	"time"
-
-	shellwords "github.com/mattn/go-shellwords"
 )
 
 // Output ...
@@ -52,41 +50,23 @@ func (o *Output) OutputCombime() {
 
 // Executer ...
 type Executer struct {
-	commands [][]string
-	ctx      context.Context
-	cancel   context.CancelFunc
-	timeout  int
-	out      chan *Output
+	command []string
+	ctx     context.Context
+	cancel  context.CancelFunc
+	timeout int
+	out     chan *Output
 }
 
 // NewExecuter ...
-func NewExecuter(ctx context.Context, command string, timeout int) (*Executer, error) {
+func NewExecuter(ctx context.Context, command []string, timeout int) (*Executer, error) {
 	innerCtx, cancel := context.WithCancel(ctx)
-	commands := [][]string{}
-	parser := shellwords.NewParser()
-	for {
-		c, err := parser.Parse(command)
-		if err != nil {
-			cancel()
-			return nil, err
-		}
-		commands = append(commands, c)
-		pos := parser.Position
-		if pos < 0 {
-			break
-		}
-		if string(command[pos]) != "|" {
-			break
-		}
-		command = command[pos+1:]
-	}
 
 	return &Executer{
-		commands: commands,
-		ctx:      innerCtx,
-		cancel:   cancel,
-		timeout:  timeout,
-		out:      make(chan *Output, 1000),
+		command: command,
+		ctx:     innerCtx,
+		cancel:  cancel,
+		timeout: timeout,
+		out:     make(chan *Output, 1000),
 	}, nil
 }
 
@@ -110,34 +90,22 @@ func (e *Executer) Execute(out *Output, in *bytes.Buffer) {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 
-	// reference: https://github.com/mattn/go-pipeline/blob/master/pipeline.go#L9
-	cmds := make([]*exec.Cmd, len(e.commands))
 	var err error
 
-	for i, c := range e.commands {
-		cmds[i] = exec.CommandContext(innerCtx, c[0], c[1:]...)
-		if i > 0 {
-			if cmds[i].Stdin, err = cmds[i-1].StdoutPipe(); err != nil {
-				out.Stderr = fmt.Sprintf("%s", err)
-				return
-			}
-		}
-		cmds[i].Stderr = &stderr
-	}
+	cmd := exec.CommandContext(innerCtx, e.command[0], e.command[1:]...)
+	cmd.Stderr = &stderr
 
-	stdin, err := cmds[0].StdinPipe()
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		out.Stderr = fmt.Sprintf("%s", err)
 		return
 	}
 
-	cmds[len(cmds)-1].Stdout = &stdout
+	cmd.Stdout = &stdout
 
-	for _, c := range cmds {
-		if err = c.Start(); err != nil {
-			out.Stderr = fmt.Sprintf("%s", err)
-			return
-		}
+	if err = cmd.Start(); err != nil {
+		out.Stderr = fmt.Sprintf("%s", err)
+		return
 	}
 
 	_, err = stdin.Write(in.Bytes()) // FIXME
@@ -152,11 +120,9 @@ func (e *Executer) Execute(out *Output, in *bytes.Buffer) {
 		return
 	}
 
-	for _, c := range cmds {
-		if err = c.Wait(); err != nil {
-			out.Stderr = fmt.Sprintf("%s", err)
-			return
-		}
+	if err = cmd.Wait(); err != nil {
+		out.Stderr = fmt.Sprintf("%s", err)
+		return
 	}
 
 	out.Stdout = stdout.String()
