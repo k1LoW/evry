@@ -15,10 +15,16 @@ Key features of `evry` are:
 $ [STDIN] | evry [-l N or -s N] -c [COMMAND]
 ```
 
+or
+
+``` console
+$ [STDIN] | evry [-l N or -s N] -- [COMMAND]
+```
+
 ### Count number of requests every 10 seconds
 
 ``` console
-$ tail -F access.log | evry -s 10 -c 'wc -l'
+$ tail -F access.log | evry -s 10 -- wc -l
 ```
 
 ### Show top 5 access rank every 1000 lines
