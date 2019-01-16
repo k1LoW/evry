@@ -30,7 +30,7 @@ type LineSplitter struct {
 }
 
 // NewLineSplitter ...
-func NewLineSplitter(ctx context.Context, line int, command string, timeout int) (*LineSplitter, error) {
+func NewLineSplitter(ctx context.Context, line int, command []string, timeout int) (*LineSplitter, error) {
 	innerCtx, cancel := context.WithCancel(ctx)
 
 	e, err := executer.NewExecuter(innerCtx, command, timeout)
@@ -133,7 +133,7 @@ type SecSplitter struct {
 }
 
 // NewSecSplitter ...
-func NewSecSplitter(ctx context.Context, sec int, command string, timeout int) (*SecSplitter, error) {
+func NewSecSplitter(ctx context.Context, sec int, command []string, timeout int) (*SecSplitter, error) {
 	innerCtx, cancel := context.WithCancel(ctx)
 
 	e, err := executer.NewExecuter(innerCtx, command, timeout)
