@@ -73,8 +73,13 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 		var s splitter.Splitter
 		var err error
+		var c []string
 
-		c := []string{"sh", "-c", command}
+		if len(args) > 0 {
+			c = args
+		} else {
+			c = []string{"sh", "-c", command}
+		}
 
 		if line > 0 {
 			s, err = splitter.NewLineSplitter(ctx, line, c, timeout)

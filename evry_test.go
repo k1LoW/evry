@@ -55,6 +55,15 @@ func TestPipe(t *testing.T) {
 	}
 }
 
+func TestPipeWithArgs(t *testing.T) {
+	cmd := `echo -e "b\nc\na\ne\nd" | ./evry -l 10 -- sh -c 'cat | sort | head -3'`
+	want := "a\nb\nc\n"
+	got := execCmd(cmd)
+	if got != want {
+		t.Errorf("\nwant %q\ngot  %q", want, got)
+	}
+}
+
 func execCmd(cmd string) string {
 	b, _ := exec.Command(os.Getenv("SHELL"), "-c", cmd).Output()
 	return string(b)
