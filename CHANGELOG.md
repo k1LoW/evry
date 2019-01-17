@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.2.0](https://github.com/k1LoW/evry/compare/v0.1.2...v0.2.0) (2019-01-17)
+
+* Allow specifying of command by args [#4](https://github.com/k1LoW/evry/pull/4) ([k1LoW](https://github.com/k1LoW))
+* Use `sh -c` instead of go-shellwords [#3](https://github.com/k1LoW/evry/pull/3) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.1.2](https://github.com/k1LoW/evry/compare/v0.1.1...v0.1.2) (2019-01-06)
 
 * Use bytes.Buffer [#2](https://github.com/k1LoW/evry/pull/2) ([k1LoW](https://github.com/k1LoW))
