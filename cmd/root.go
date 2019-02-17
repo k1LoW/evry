@@ -39,7 +39,7 @@ var (
 	timeout int
 )
 
-const version = "0.2.0"
+const version = "0.2.1"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
