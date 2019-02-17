@@ -60,7 +60,11 @@ var rootCmd = &cobra.Command{
 			fmt.Println(version)
 			os.Exit(0)
 		}
-		fi, _ := os.Stdin.Stat()
+		fi, err := os.Stdin.Stat()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
+		}
 		if (fi.Mode() & os.ModeCharDevice) != 0 {
 			return errors.New("evry need STDIN. Please use pipe")
 		}
