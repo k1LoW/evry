@@ -30,7 +30,6 @@ import (
 
 	"github.com/k1LoW/evry/splitter"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -61,7 +60,8 @@ var rootCmd = &cobra.Command{
 			fmt.Println(version)
 			os.Exit(0)
 		}
-		if terminal.IsTerminal(0) {
+		fi, _ := os.Stdin.Stat()
+		if (fi.Mode() & os.ModeCharDevice) != 0 {
 			return errors.New("evry need STDIN. Please use pipe")
 		}
 		if (line == 0 && sec == 0) || (line > 0) && (sec > 0) {
