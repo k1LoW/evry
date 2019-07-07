@@ -33,18 +33,23 @@ $ tail -F access.log | evry -s 10 -- wc -l
 $ tail -F access.log | evry -l 1000 -c 'cut -d" " -f7 | sort | uniq -c | sort -nr | head -5'
 ```
 
-## Installation
+## Install
 
-```console
-$ go get github.com/k1LoW/evry
-```
-
-or
+**homebrew tap:**
 
 ```console
 $ brew install k1LoW/tap/evry
 ```
 
+**manually:**
+
+Download binany from [releases page](https://github.com/k1LoW/evry/releases)
+
+**go get:**
+
+```console
+$ go get github.com/k1LoW/evry
+```
 ## References
 
 - https://github.com/mattn/go-pipeline
