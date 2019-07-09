@@ -43,7 +43,7 @@ const version = "0.2.1"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use: "[STDIN] | evry [-l N or -s N] -c [COMMAND]",
+	Use: "[COMMAND] | evry [-l N or -s N] -c [COMMAND]",
 	Example: `  Count number of requests every 10 seconds
 
     tail -f access.log | evry -s 10 -c 'wc -l'`,
