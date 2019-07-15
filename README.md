@@ -2,12 +2,14 @@
 
 `evry` split STDIN stream and execute specified command **every** N lines/seconds.
 
+![screencast](doc/screencast.svg)
+
 Key features of `evry` are:
 
 - Split STDIN stream **every N lines** or **every N seconds**.
 - **Sequential** IN -> **Parallel execution** -> **Sequential OUT**.
 
-![img](evry.png)
+![img](doc/evry.png)
 
 ## Usage
 
