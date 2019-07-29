@@ -29,6 +29,7 @@ import (
 	"os"
 
 	"github.com/k1LoW/evry/splitter"
+	"github.com/k1LoW/evry/version"
 	"github.com/spf13/cobra"
 )
 
@@ -38,8 +39,6 @@ var (
 	command string
 	timeout int
 )
-
-const version = "0.2.1"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -57,7 +56,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if versionVal {
-			fmt.Println(version)
+			fmt.Println(version.Version)
 			os.Exit(0)
 		}
 		fi, err := os.Stdin.Stat()
