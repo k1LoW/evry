@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.2](https://github.com/k1LoW/evry/compare/v0.2.1...v0.2.2) (2019-07-29)
+
+* Use github.com/k1LoW/exec [#6](https://github.com/k1LoW/evry/pull/6) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.2.1](https://github.com/k1LoW/evry/compare/v0.2.0...v0.2.1) (2019-02-17)
 
 * Fix pipe detection [#5](https://github.com/k1LoW/evry/pull/5) ([k1LoW](https://github.com/k1LoW))
