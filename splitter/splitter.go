@@ -82,8 +82,12 @@ L:
 				break L
 			}
 			bm.Lock()
-			buffer.Write(in)
+			_, err := buffer.Write(in)
 			bm.Unlock()
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%s", err)
+				break L
+			}
 			count++
 			if count == s.interval {
 				wg.Add(1)
