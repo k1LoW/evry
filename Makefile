@@ -15,7 +15,7 @@ default: test
 
 ci: depsdev test sec
 
-test:
+test: build
 	go test ./... -coverprofile=coverage.txt -covermode=count
 
 sec:
