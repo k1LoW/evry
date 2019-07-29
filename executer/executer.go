@@ -5,9 +5,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"sync"
 	"time"
+
+	"github.com/k1LoW/exec"
 )
 
 // Output ...
