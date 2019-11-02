@@ -65,6 +65,6 @@ func TestPipeWithArgs(t *testing.T) {
 }
 
 func execCmd(cmd string) string {
-	b, _ := exec.Command(os.Getenv("SHELL"), "-c", cmd).Output()
+	b, _ := exec.Command(os.Getenv("SHELL"), "-c", cmd).CombinedOutput()
 	return string(b)
 }
