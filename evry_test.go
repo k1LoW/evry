@@ -29,8 +29,14 @@ var tests = []struct {
 
 func TestCat(t *testing.T) {
 	for _, tt := range tests {
-		want := execCmd(tt.cmd)
-		got := execCmd(fmt.Sprintf("%s | %s", tt.cmd, tt.evryCmd))
+		want, err := execCmd(tt.cmd)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := execCmd(fmt.Sprintf("%s | %s", tt.cmd, tt.evryCmd))
+		if err != nil {
+			t.Fatal(err)
+		}
 		if got != want {
 			t.Errorf("\nwant %q\ngot  %q", want, got)
 		}
@@ -40,7 +46,10 @@ func TestCat(t *testing.T) {
 func TestMutex(t *testing.T) {
 	cmd := `echo -e "2\n0\n1" | ./evry -l 1 -c 'xargs -I@ sh -c "sleep @; echo sleep @"'`
 	want := "sleep 2\nsleep 0\nsleep 1\n"
-	got := execCmd(cmd)
+	got, err := execCmd(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if got != want {
 		t.Errorf("\nwant %q\ngot  %q", want, got)
 	}
@@ -49,7 +58,10 @@ func TestMutex(t *testing.T) {
 func TestPipe(t *testing.T) {
 	cmd := `echo -e "b\nc\na\ne\nd" | ./evry -l 10 -c 'cat | sort | head -3'`
 	want := "a\nb\nc\n"
-	got := execCmd(cmd)
+	got, err := execCmd(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if got != want {
 		t.Errorf("\nwant %q\ngot  %q", want, got)
 	}
@@ -58,13 +70,19 @@ func TestPipe(t *testing.T) {
 func TestPipeWithArgs(t *testing.T) {
 	cmd := `echo -e "b\nc\na\ne\nd" | ./evry -l 10 -- sh -c 'cat | sort | head -3'`
 	want := "a\nb\nc\n"
-	got := execCmd(cmd)
+	got, err := execCmd(cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if got != want {
 		t.Errorf("\nwant %q\ngot  %q", want, got)
 	}
 }
 
-func execCmd(cmd string) string {
-	b, _ := exec.Command(os.Getenv("SHELL"), "-c", cmd).Output()
-	return string(b)
+func execCmd(cmd string) (string, error) {
+	b, err := exec.Command(os.Getenv("SHELL"), "-c", cmd).CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }
