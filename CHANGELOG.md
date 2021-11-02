@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.3.0](https://github.com/k1LoW/evry/compare/v0.2.2...v0.3.0) (2021-11-02)
+
+* Update pkg and go version [#8](https://github.com/k1LoW/evry/pull/8) ([k1LoW](https://github.com/k1LoW))
+* Use GitHub Actions [#7](https://github.com/k1LoW/evry/pull/7) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.2.2](https://github.com/k1LoW/evry/compare/v0.2.1...v0.2.2) (2019-07-29)
 
 * Use github.com/k1LoW/exec [#6](https://github.com/k1LoW/evry/pull/6) ([k1LoW](https://github.com/k1LoW))
