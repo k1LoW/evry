@@ -16,6 +16,8 @@ default: test
 ci: depsdev test sec
 
 test: build
+	pwd
+	ls
 	go test ./... -coverprofile=coverage.out -covermode=count
 
 sec:
