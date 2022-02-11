@@ -31,7 +31,7 @@ func TestCat(t *testing.T) {
 	for _, tt := range tests {
 		want, err := execCmd(tt.cmd)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatal(err, tt.cmd)
 		}
 		got, err := execCmd(fmt.Sprintf("%s | %s", tt.cmd, tt.evryCmd))
 		if err != nil {
@@ -48,7 +48,7 @@ func TestMutex(t *testing.T) {
 	want := "sleep 2\nsleep 0\nsleep 1\n"
 	got, err := execCmd(cmd)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatal(err, cmd)
 	}
 	if got != want {
 		t.Errorf("\nwant %q\ngot  %q", want, got)

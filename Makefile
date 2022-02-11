@@ -16,7 +16,9 @@ default: test
 ci: depsdev test sec
 
 test: build
-	go test ./... -coverprofile=coverage.txt -covermode=count
+	pwd
+	ls
+	go test ./... -coverprofile=coverage.out -covermode=count
 
 sec:
 	gosec ./...
@@ -25,12 +27,9 @@ build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
 depsdev:
-	go get golang.org/x/tools/cmd/cover
-	go get golang.org/x/lint/golint
-	go get github.com/linyows/git-semv/cmd/git-semv
-	go get github.com/Songmu/ghch/cmd/ghch
-	go get github.com/Songmu/gocredits/cmd/gocredits
-	go get github.com/securego/gosec/cmd/gosec
+	go install github.com/Songmu/ghch/cmd/ghch@v0.10.2
+	go install github.com/Songmu/gocredits/cmd/gocredits@v0.2.0
+	go install github.com/securego/gosec/v2/cmd/gosec@v2.8.1
 
 prerelease:
 	ghch -w -N ${VER}
